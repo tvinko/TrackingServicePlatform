@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mqtt
+  labels:
+    app: mqtt
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mqtt
+  template:
+    metadata:
+      labels:
+        app: mqtt
+    spec:
+      containers:
+      - name: mqtt
+        image: sersenia/eclipse-mosquitto-no-auth
+        ports:
+        - containerPort: 1883
+        - containerPort: 8883
+        env:
+        - name: MQTT_HOST
+          valueFrom: 
+            configMapKeyRef:
+              name: mqtt-configmap
+              key: mqtt_host

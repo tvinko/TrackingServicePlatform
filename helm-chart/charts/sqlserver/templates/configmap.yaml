@@ -1,0 +1,50 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sql-server-configmap
+data:
+  accept_eula: "Y"
+  sql_server_name: "sql-server-service"
+  poststart.sh: |
+    #!/bin/bash
+    database=Accounts
+    wait_time=25s
+    password=P@ssw0rd
+    sql_db_create="DROP DATABASE Accounts;
+    CREATE DATABASE Accounts;"
+
+    sql_db_accounts_table="USE Accounts;
+      CREATE TABLE [dbo].[t_Accounts](
+      account_id INT NOT NULL,
+      account_name varchar(250) NOT NULL,
+      is_active bit NOT NULL,
+      PRIMARY KEY (account_id)
+    );"
+    
+    sql_db_stored_procedure="
+      CREATE PROCEDURE [dbo].[sp_IsAccountActive](@AccountID INT)
+      AS
+      BEGIN
+        SET NOCOUNT ON;
+        SELECT is_active FROM [dbo].[t_Accounts] WHERE account_id= @AccountID
+      END"
+
+    sql_db_insert="USE Accounts;
+      INSERT INTO [dbo].[t_Accounts](account_id, account_name, is_active)
+      SELECT 1,'Tomaz',1
+      UNION
+      SELECT 2,'John', 1
+      UNION
+      SELECT 3,'Paul', 0"
+
+    # wait for SQL Server to come up
+    echo importing data will start in $wait_time...
+    sleep $wait_time
+    echo importing data...
+
+    # run the init scripts
+    /opt/mssql-tools/bin/sqlcmd -S 0.0.0.0 -U sa -P $password -q "$sql_db_create"
+    /opt/mssql-tools/bin/sqlcmd -S 0.0.0.0 -U sa -P $password -q "$sql_db_accounts_table"
+    /opt/mssql-tools/bin/sqlcmd -S0.0.0.0 -d$database -Usa -P$password -q"$sql_db_stored_procedure"
+    /opt/mssql-tools/bin/sqlcmd -S 0.0.0.0 -U sa -P $password -q "$sql_db_insert"
+    

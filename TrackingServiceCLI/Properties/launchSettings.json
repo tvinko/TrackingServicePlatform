@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "TrackingServiceCLI": {
+      "commandName": "Project",
+      "commandLineArgs": "--read \"c:\\program file\""
+    }
+  }
+}

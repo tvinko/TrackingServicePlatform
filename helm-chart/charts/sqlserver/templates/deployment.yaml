@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sql-server-deployment
+  labels:
+    app: sql-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sql-server
+  template:
+    metadata:
+      labels:
+        app: sql-server
+    spec:
+
+      containers:
+      - name: sql-server
+        image: mcr.microsoft.com/mssql/server:2019-latest
+        imagePullPolicy: Always
+        volumeMounts:
+          - mountPath: /opt/poststart.sh
+            subPath: poststart.sh
+            name: hookvolume
+        
+        env:
+          - name: ACCEPT_EULA
+            valueFrom: 
+              configMapKeyRef:
+                name: sql-server-configmap
+                key: accept_eula
+
+          - name: SA_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: sql-server-secret
+                key: sql-server-sa-password
+
+        lifecycle:
+          postStart:
+            exec:
+              command: ["/bin/sh", "-c", /opt/poststart.sh ]
+
+        ports:
+        - containerPort: 1433
+        
+      volumes:
+      - name: hookvolume
+        configMap:
+          name: sql-server-configmap
+          defaultMode: 0755
+     

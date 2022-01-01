@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: tracking-service-service
+  #labels:
+    #app: tracking-service-metrics
+    #release: kube-prometheus-stack-1638946370
+spec:
+  selector:
+    app: {{ .Release.Name }}
+  type: LoadBalancer  
+  ports:
+    - name: metrics
+      protocol: TCP
+      port: 80
+      targetPort: 80
+      nodePort: 30000

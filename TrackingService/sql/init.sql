@@ -1,0 +1,4 @@
+DROP DATABASE Accounts
+
+CREATE DATABASE Accounts;
+GO

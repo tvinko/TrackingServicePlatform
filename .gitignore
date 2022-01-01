@@ -1,0 +1,19 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/.vs
+/TrackingService/bin/Debug/net5.0
+/TrackingServiceCLI/bin/Debug/net5.0
+/TrackingServiceCLI/obj
+/TrackingServiceTest/bin/Debug/net5.0
+/TrackingServiceTest/obj
+/TrackingService/bin/Release/net5.0
+/TrackingService/obj/Release/net5.0
+/TrackingServiceCLI/bin/Release/net5.0
+/TrackingServiceTest/bin/Release/net5.0
+/TrackingService/obj
+TrackingService/bin/
+TrackingService/.DS_Store
+k8s-configuration/helm/trackingservice/templates/secret.yaml
+.DS_Store

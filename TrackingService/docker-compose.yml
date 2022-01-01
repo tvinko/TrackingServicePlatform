@@ -1,0 +1,57 @@
+﻿version: "3"
+
+services:
+  mosquitto:
+    image: sersenia/eclipse-mosquitto-no-auth
+    ports:
+      - 1883:1883
+      - 8883:8883
+    networks:
+      - tracking_service_network
+
+  trackingservice:
+    image: "sersenia/trackingservice:1.0"
+    ports:
+      - "80"
+    networks:
+      - tracking_service_network
+
+  nginx:
+    image: nginx:latest
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - trackingservice
+    ports:
+      - "4000:4000"
+    networks:
+       - tracking_service_network
+
+  mssqldata:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    entrypoint: /bin/bash
+
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    ports:
+      - 1433:1433
+    volumes:
+      - /var/opt/mssql
+      # we copy our scripts onto the container
+      - ./sql:/usr/src/app 
+    # bash will be executed from that path, our scripts folder
+    working_dir: /usr/src/app 
+    # run the entrypoint.sh that will import the data AND sqlserver
+    command: sh -c ' chmod +x ./entrypoint.sh; ./entrypoint.sh & /opt/mssql/bin/sqlservr;'
+    environment:
+      ACCEPT_EULA: Y
+      SA_PASSWORD: P@ssw0rd
+    # don't use this if you don't want to persit data between docker up and down
+    volumes_from:
+      - mssqldata
+    networks:
+       - tracking_service_network
+
+networks:
+  tracking_service_network:
+     driver: bridge

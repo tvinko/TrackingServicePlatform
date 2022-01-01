@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}
+  labels:
+    app: {{ .Release.Name }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}
+    spec:
+      containers:
+      - name: {{ .Release.Name }}
+        image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+        imagePullPolicy: Always
+      
+        ports:
+        - containerPort: 80
+        env:
+        - name: ASPNETCORE_ENVIRONMENT
+          valueFrom: 
+            configMapKeyRef:
+              name: {{ .Release.Name }}-configmap
+              key: aspnetcore_environment
+              
+        - name: SQL_SERVER_NAME
+          valueFrom: 
+            configMapKeyRef:
+              name: sql-server-configmap
+              key: sql_server_name
+
+        - name: SA_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: sql-server-secret
+              key: sql-server-sa-password
+
+        - name: MQTT_HOST
+          valueFrom: 
+            configMapKeyRef:
+              name: mqtt-configmap
+              key: mqtt_host
+      imagePullSecrets:
+      - name: {{ .Release.Name }}-secret

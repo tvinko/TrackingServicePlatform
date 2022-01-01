@@ -1,0 +1,6 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mqtt-configmap
+data:
+  mqtt_host: "mqtt-service"
